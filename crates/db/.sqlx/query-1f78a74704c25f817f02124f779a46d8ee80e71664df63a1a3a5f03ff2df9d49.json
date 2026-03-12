@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT OR IGNORE INTO pull_requests (id, workspace_id, repo_id, pr_url, pr_number, pr_status, target_branch_name, created_at)\n            VALUES (?, ?, ?, ?, ?, 'open', ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 7
+    },
+    "nullable": []
+  },
+  "hash": "1f78a74704c25f817f02124f779a46d8ee80e71664df63a1a3a5f03ff2df9d49"
+}

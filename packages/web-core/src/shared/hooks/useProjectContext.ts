@@ -11,6 +11,7 @@ import type {
   IssueTag,
   IssueRelationship,
   PullRequest,
+  PullRequestIssue,
   Workspace,
   CreateIssueRequest,
   UpdateIssueRequest,
@@ -50,6 +51,7 @@ export interface ProjectContextValue {
   issueTags: IssueTag[];
   issueRelationships: IssueRelationship[];
   pullRequests: PullRequest[];
+  pullRequestIssues: PullRequestIssue[];
   workspaces: Workspace[];
 
   // Loading/error state

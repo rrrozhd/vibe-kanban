@@ -23,10 +23,19 @@ pub struct PullRequest {
     pub merged_at: Option<DateTime<Utc>>,
     pub merge_commit_sha: Option<String>,
     pub target_branch_name: String,
+    pub project_id: Uuid,
+    #[deprecated(note = "use pull_request_issues join table instead")]
     pub issue_id: Uuid,
     pub workspace_id: Option<Uuid>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+pub struct PullRequestIssue {
+    pub id: Uuid,
+    pub pull_request_id: Uuid,
+    pub issue_id: Uuid,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -37,4 +46,9 @@ pub struct ListPullRequestsQuery {
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 pub struct ListPullRequestsResponse {
     pub pull_requests: Vec<PullRequest>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+pub struct ListPullRequestIssuesResponse {
+    pub pull_request_issues: Vec<PullRequestIssue>,
 }

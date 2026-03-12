@@ -9,6 +9,7 @@ import {
   PROJECT_ISSUE_TAGS_SHAPE,
   PROJECT_ISSUE_RELATIONSHIPS_SHAPE,
   PROJECT_PULL_REQUESTS_SHAPE,
+  PROJECT_PULL_REQUEST_ISSUES_SHAPE,
   PROJECT_WORKSPACES_SHAPE,
   ISSUE_MUTATION,
   PROJECT_STATUS_MUTATION,
@@ -68,6 +69,11 @@ export function ProjectProvider({ projectId, children }: ProjectProviderProps) {
   const pullRequestsResult = useShape(PROJECT_PULL_REQUESTS_SHAPE, params, {
     enabled,
   });
+  const pullRequestIssuesResult = useShape(
+    PROJECT_PULL_REQUEST_ISSUES_SHAPE,
+    params,
+    { enabled }
+  );
   const workspacesResult = useShape(PROJECT_WORKSPACES_SHAPE, params, {
     enabled,
   });
@@ -86,6 +92,7 @@ export function ProjectProvider({ projectId, children }: ProjectProviderProps) {
     issueTagsResult.error ||
     issueRelationshipsResult.error ||
     pullRequestsResult.error ||
+    pullRequestIssuesResult.error ||
     workspacesResult.error ||
     null;
 
@@ -99,6 +106,7 @@ export function ProjectProvider({ projectId, children }: ProjectProviderProps) {
     issueTagsResult.retry();
     issueRelationshipsResult.retry();
     pullRequestsResult.retry();
+    pullRequestIssuesResult.retry();
     workspacesResult.retry();
   }, [
     issuesResult,
@@ -109,6 +117,7 @@ export function ProjectProvider({ projectId, children }: ProjectProviderProps) {
     issueTagsResult,
     issueRelationshipsResult,
     pullRequestsResult,
+    pullRequestIssuesResult,
     workspacesResult,
   ]);
 
@@ -198,9 +207,14 @@ export function ProjectProvider({ projectId, children }: ProjectProviderProps) {
   );
 
   const getPullRequestsForIssue = useCallback(
-    (issueId: string) =>
-      pullRequestsResult.data.filter((pr) => pr.issue_id === issueId),
-    [pullRequestsResult.data]
+    (issueId: string) => {
+      const prIds = pullRequestIssuesResult.data
+        .filter((link) => link.issue_id === issueId)
+        .map((link) => link.pull_request_id);
+      const prIdSet = new Set(prIds);
+      return pullRequestsResult.data.filter((pr) => prIdSet.has(pr.id));
+    },
+    [pullRequestIssuesResult.data, pullRequestsResult.data]
   );
 
   const getWorkspacesForIssue = useCallback(
@@ -222,6 +236,7 @@ export function ProjectProvider({ projectId, children }: ProjectProviderProps) {
       issueTags: issueTagsResult.data,
       issueRelationships: issueRelationshipsResult.data,
       pullRequests: pullRequestsResult.data,
+      pullRequestIssues: pullRequestIssuesResult.data,
       workspaces: workspacesResult.data,
 
       // Loading/error
@@ -288,6 +303,7 @@ export function ProjectProvider({ projectId, children }: ProjectProviderProps) {
       issueTagsResult,
       issueRelationshipsResult,
       pullRequestsResult,
+      pullRequestIssuesResult,
       workspacesResult,
       isLoading,
       error,

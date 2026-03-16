@@ -35,13 +35,19 @@ pub struct PreviewProxyService {
     http_client: Client,
 }
 
-impl PreviewProxyService {
-    pub fn new() -> Self {
+impl Default for PreviewProxyService {
+    fn default() -> Self {
         let http_client = Client::builder()
             .redirect(reqwest::redirect::Policy::none())
             .build()
             .expect("failed to build preview proxy HTTP client");
         Self { http_client }
+    }
+}
+
+impl PreviewProxyService {
+    pub fn new() -> Self {
+        Self::default()
     }
 
     pub fn http_client(&self) -> &Client {

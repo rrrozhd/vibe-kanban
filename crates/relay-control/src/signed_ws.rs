@@ -159,7 +159,7 @@ mod tungstenite_impl {
 // Public types — the relay WS signing contract
 // ---------------------------------------------------------------------------
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, ts_rs::TS)]
 #[serde(rename_all = "lowercase")]
 pub enum RelayWsMessageType {
     Text,

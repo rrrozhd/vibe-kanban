@@ -10,8 +10,6 @@ const LOOPS_REVIEW_READY_TEMPLATE_ID: &str = "cmj47k5ge16990iylued9by17";
 const LOOPS_REVIEW_FAILED_TEMPLATE_ID: &str = "cmj49ougk1c8s0iznavijdqpo";
 const LOOPS_DIGEST_TEMPLATE_ID: &str = "cmmm6lr64016v0i2mvi1m0ras";
 
-use crate::digest::email::DigestEmailItem;
-
 #[derive(Debug, Error)]
 pub enum DigestEmailError {
     #[error("loops send failed for digest: status={status}, body={body}")]
@@ -43,7 +41,7 @@ pub trait Mailer: Send + Sync {
         email: &str,
         name: &str,
         notification_count: i32,
-        items: &[DigestEmailItem],
+        email_body: &str,
         notifications_url: &str,
     ) -> Result<(), DigestEmailError>;
 }
@@ -89,7 +87,7 @@ impl Mailer for NoopMailer {
         email: &str,
         _name: &str,
         notification_count: i32,
-        _items: &[DigestEmailItem],
+        _email_body: &str,
         _notifications_url: &str,
     ) -> Result<(), DigestEmailError> {
         tracing::warn!(
@@ -264,7 +262,7 @@ impl Mailer for LoopsMailer {
         email: &str,
         name: &str,
         notification_count: i32,
-        items: &[DigestEmailItem],
+        email_body: &str,
         notifications_url: &str,
     ) -> Result<(), DigestEmailError> {
         if cfg!(debug_assertions) {
@@ -272,9 +270,7 @@ impl Mailer for LoopsMailer {
                 "Sending digest email to {email}\n\
                  Name: {name}\n\
                  Total notifications: {notification_count}\n\
-                 Preview items: {}\n\
-                 Notifications URL: {notifications_url}",
-                items.len()
+                 Notifications URL: {notifications_url}"
             );
         }
 
@@ -284,7 +280,7 @@ impl Mailer for LoopsMailer {
             "dataVariables": {
                 "name": name,
                 "notificationCount": notification_count,
-                "items": items,
+                "emailBody": email_body,
                 "notificationsUrl": notifications_url,
             }
         });

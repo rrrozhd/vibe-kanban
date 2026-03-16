@@ -97,17 +97,23 @@ async fn process_user_digest(
         .collect::<Vec<_>>();
 
     let name = email::recipient_name(user);
-    let items = email::build_preview_items(&notification_rows, base_url);
+    let email_body = email::render_email_body(&notification_rows, base_url);
     let notifications_url = email::notifications_url(base_url);
 
     if let Err(error) = mailer
-        .send_notification_digest(&user.email, &name, total_count, &items, &notifications_url)
+        .send_notification_digest(
+            &user.email,
+            &name,
+            total_count,
+            &email_body,
+            &notifications_url,
+        )
         .await
     {
         return Err(error.into());
     }
 
-    DigestRepository::record_notifications_delivered(pool, user.id, &notification_ids).await?;
+    DigestRepository::record_notifications_delivered(pool, &notification_ids).await?;
 
     Ok(1)
 }

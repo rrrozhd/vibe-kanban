@@ -1,6 +1,6 @@
 use api_types::{NotificationPayload, NotificationType};
 use chrono::{DateTime, Utc};
-use sqlx::PgPool;
+use sqlx::{PgPool, Postgres, pool::PoolConnection};
 use uuid::Uuid;
 
 use crate::digest::DigestUser;
@@ -17,7 +17,25 @@ pub struct NotificationDigestRow {
 
 pub struct DigestRepository;
 
+pub struct DigestRunLock {
+    connection: PoolConnection<Postgres>,
+}
+
 impl DigestRepository {
+    pub async fn try_acquire_run_lock(pool: &PgPool) -> Result<Option<DigestRunLock>, sqlx::Error> {
+        let mut connection = pool.acquire().await?;
+        let acquired: bool = sqlx::query_scalar("SELECT pg_try_advisory_lock($1)")
+            .bind(3_447_201_001_i64)
+            .fetch_one(&mut *connection)
+            .await?;
+
+        if acquired {
+            Ok(Some(DigestRunLock { connection }))
+        } else {
+            Ok(None)
+        }
+    }
+
     pub async fn fetch_users_with_pending_notifications(
         pool: &PgPool,
         window_start: DateTime<Utc>,
@@ -93,7 +111,6 @@ impl DigestRepository {
 
     pub async fn record_notifications_delivered(
         pool: &PgPool,
-        user_id: Uuid,
         notification_ids: &[Uuid],
     ) -> Result<(), sqlx::Error> {
         if notification_ids.is_empty() {
@@ -102,16 +119,26 @@ impl DigestRepository {
 
         sqlx::query!(
             r#"
-            INSERT INTO notification_digest_deliveries (notification_id, user_id)
-            SELECT notification_id, $2
+            INSERT INTO notification_digest_deliveries (notification_id)
+            SELECT notification_id
             FROM UNNEST($1::uuid[]) AS delivered(notification_id)
             ON CONFLICT (notification_id) DO NOTHING
             "#,
             notification_ids,
-            user_id,
         )
         .execute(pool)
         .await?;
+
+        Ok(())
+    }
+}
+
+impl DigestRunLock {
+    pub async fn release(mut self) -> Result<(), sqlx::Error> {
+        sqlx::query("SELECT pg_advisory_unlock($1)")
+            .bind(3_447_201_001_i64)
+            .execute(&mut *self.connection)
+            .await?;
 
         Ok(())
     }

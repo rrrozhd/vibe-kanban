@@ -1,0 +1,92 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT\n                id as \"id!: Uuid\",\n                project_id as \"project_id!: Uuid\",\n                issue_number as \"issue_number!: i32\",\n                simple_id,\n                status_id as \"status_id!: Uuid\",\n                title,\n                description,\n                priority,\n                sort_order as \"sort_order!: f64\",\n                parent_issue_id as \"parent_issue_id: Uuid\",\n                extension_metadata,\n                created_at as \"created_at!: DateTime<Utc>\",\n                updated_at as \"updated_at!: DateTime<Utc>\"\n               FROM overseer_issues\n               WHERE project_id = $1\n                 AND json_extract(extension_metadata, '$.overseer.dedupe_key') = $2",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!: Uuid",
+        "ordinal": 0,
+        "type_info": "Blob"
+      },
+      {
+        "name": "project_id!: Uuid",
+        "ordinal": 1,
+        "type_info": "Blob"
+      },
+      {
+        "name": "issue_number!: i32",
+        "ordinal": 2,
+        "type_info": "Integer"
+      },
+      {
+        "name": "simple_id",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "status_id!: Uuid",
+        "ordinal": 4,
+        "type_info": "Blob"
+      },
+      {
+        "name": "title",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "description",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "priority",
+        "ordinal": 7,
+        "type_info": "Text"
+      },
+      {
+        "name": "sort_order!: f64",
+        "ordinal": 8,
+        "type_info": "Float"
+      },
+      {
+        "name": "parent_issue_id: Uuid",
+        "ordinal": 9,
+        "type_info": "Blob"
+      },
+      {
+        "name": "extension_metadata",
+        "ordinal": 10,
+        "type_info": "Text"
+      },
+      {
+        "name": "created_at!: DateTime<Utc>",
+        "ordinal": 11,
+        "type_info": "Text"
+      },
+      {
+        "name": "updated_at!: DateTime<Utc>",
+        "ordinal": 12,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "0c93caac1f411124e92ed0a23a7d1296821f7162eed23a6f22d67238e3175d6f"
+}

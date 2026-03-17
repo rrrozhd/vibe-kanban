@@ -6,6 +6,7 @@ mod issue_assignees;
 mod issue_relationships;
 mod issue_tags;
 mod issues;
+pub mod overseer;
 mod project_statuses;
 mod projects;
 mod pull_requests;
@@ -18,6 +19,7 @@ pub fn router() -> Router<DeploymentImpl> {
         .merge(issue_relationships::router())
         .merge(issue_tags::router())
         .merge(issues::router())
+        .merge(overseer::router())
         .merge(projects::router())
         .merge(project_statuses::router())
         .merge(pull_requests::router())

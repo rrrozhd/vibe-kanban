@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT COALESCE(MIN(sort_order), 1000.0) as \"n!\" FROM overseer_issues WHERE project_id = $1 AND status_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "name": "n!",
+        "ordinal": 0,
+        "type_info": "Float"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8c4b810450562179bd98d1a0804fd5a24ac7ed9742e8bd43d2b1b49b90b51b30"
+}

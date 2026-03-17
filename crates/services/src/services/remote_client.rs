@@ -779,6 +779,38 @@ impl RemoteClient {
             .map_err(|e| RemoteClientError::Serde(e.to_string()))
     }
 
+    // ── Overseer ────────────────────────────────────────────────────────
+
+    /// Gets the full board view for a project (statuses + issues).
+    pub async fn overseer_board(
+        &self,
+        project_id: Uuid,
+    ) -> Result<api_types::OverseerBoardResponse, RemoteClientError> {
+        self.get_authed(&format!("/v1/overseer/board?project_id={project_id}"))
+            .await
+    }
+
+    /// Creates an issue via the overseer API (status name resolution + dedupe).
+    pub async fn overseer_create_issue(
+        &self,
+        request: &api_types::OverseerCreateIssueRequest,
+    ) -> Result<api_types::OverseerCreateIssueResponse, RemoteClientError> {
+        self.post_authed("/v1/overseer/issues", Some(request)).await
+    }
+
+    /// Transitions an issue to a new status by name.
+    pub async fn overseer_transition_issue(
+        &self,
+        issue_id: Uuid,
+        request: &api_types::OverseerTransitionRequest,
+    ) -> Result<api_types::OverseerTransitionResponse, RemoteClientError> {
+        self.post_authed(
+            &format!("/v1/overseer/issues/{issue_id}/transition"),
+            Some(request),
+        )
+        .await
+    }
+
     // ── Issue Assignees ────────────────────────────────────────────────
 
     /// Lists assignees for an issue.

@@ -110,6 +110,29 @@ pub(crate) async fn process_file_upload(
     Err(ApiError::File(FileError::NotFound))
 }
 
+pub(crate) fn content_type_and_disposition_for_file(
+    mime_type: &str,
+) -> (&str, Option<&'static str>) {
+    if is_safe_inline_mime_type(mime_type) {
+        (mime_type, None)
+    } else {
+        ("application/octet-stream", Some("attachment"))
+    }
+}
+
+fn is_safe_inline_mime_type(mime_type: &str) -> bool {
+    matches!(
+        mime_type,
+        "image/png"
+            | "image/jpeg"
+            | "image/gif"
+            | "image/webp"
+            | "image/bmp"
+            | "image/x-icon"
+            | "image/tiff"
+    )
+}
+
 pub async fn serve_file(
     Path(file_id): Path<Uuid>,
     State(deployment): State<DeploymentImpl>,
@@ -131,12 +154,18 @@ pub async fn serve_file(
         .mime_type
         .as_deref()
         .unwrap_or("application/octet-stream");
+    let (content_type, content_disposition) = content_type_and_disposition_for_file(content_type);
 
-    let response = Response::builder()
+    let mut response = Response::builder()
         .status(StatusCode::OK)
         .header(header::CONTENT_TYPE, content_type)
         .header(header::CONTENT_LENGTH, metadata.len())
         .header(header::CACHE_CONTROL, "public, max-age=31536000")
+        .header(header::X_CONTENT_TYPE_OPTIONS, "nosniff");
+    if let Some(content_disposition) = content_disposition {
+        response = response.header(header::CONTENT_DISPOSITION, content_disposition);
+    }
+    let response = response
         .body(body)
         .map_err(|e| ApiError::File(FileError::ResponseBuildError(e.to_string())))?;
 

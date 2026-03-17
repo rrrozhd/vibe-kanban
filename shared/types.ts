@@ -126,7 +126,11 @@ selected_org_id: string | null,
 /**
  * Last selected project ID
  */
-selected_project_id: string | null, };
+selected_project_id: string | null, 
+/**
+ * Default setting for creating a draft workspace from new issues
+ */
+create_draft_workspace_by_default: boolean | null, };
 
 export type ProjectRepoDefaultsData = { repos: Array<DraftWorkspaceRepo>, };
 
@@ -148,7 +152,7 @@ export type Workspace = { id: string, task_id: string | null, container_ref: str
 
 export type WorkspaceWithStatus = { is_running: boolean, is_errored: boolean, id: string, task_id: string | null, container_ref: string | null, branch: string, setup_completed_at: string | null, created_at: string, updated_at: string, archived: boolean, pinned: boolean, name: string | null, worktree_deleted: boolean, };
 
-export type Session = { id: string, workspace_id: string, executor: string | null, agent_working_dir: string | null, created_at: string, updated_at: string, };
+export type Session = { id: string, workspace_id: string, name: string | null, executor: string | null, agent_working_dir: string | null, created_at: string, updated_at: string, };
 
 export type ExecutionProcess = { id: string, session_id: string, run_reason: ExecutionProcessRunReason, executor_action: ExecutorAction, status: ExecutionProcessStatus, exit_code: bigint | null, 
 /**
@@ -342,8 +346,6 @@ export type OpenEditorRequest = { editor_type: string | null, file_path: string 
 
 export type OpenEditorResponse = { url: string | null, };
 
-export type CreateWorkspaceApiRequest = { name: string | null, };
-
 export type LinkedIssueInfo = { remote_project_id: string, issue_id: string, };
 
 export type CreatePrApiRequest = { title: string, body: string | null, target_branch: string | null, draft: boolean | null, repo_id: string, auto_generate_description: boolean, };
@@ -373,12 +375,6 @@ export type PushError = { "type": "force_push_required" };
 export type PrError = { "type": "cli_not_installed", provider: ProviderKind, } | { "type": "cli_not_logged_in", provider: ProviderKind, } | { "type": "git_cli_not_logged_in" } | { "type": "git_cli_not_installed" } | { "type": "target_branch_not_found", branch: string, } | { "type": "unsupported_provider" };
 
 export type RunScriptError = { "type": "no_script_configured" } | { "type": "process_already_running" };
-
-export type AssociateWorkspaceImagesRequest = { image_ids: Array<string>, };
-
-export type ImportIssueAttachmentsRequest = { issue_id: string, };
-
-export type ImportIssueAttachmentsResponse = { image_ids: Array<string>, };
 
 export type AttachPrResponse = { pr_attached: boolean, pr_url: string | null, pr_number: bigint | null, pr_status: MergeStatus | null, };
 
@@ -413,6 +409,8 @@ export type CreateFromPrError = { "type": "pr_not_found" } | { "type": "branch_f
 export type RepoBranchStatus = { repo_id: string, repo_name: string, commits_behind: number | null, commits_ahead: number | null, has_uncommitted_changes: boolean | null, head_oid: string | null, uncommitted_count: number | null, untracked_count: number | null, target_branch_name: string, remote_commits_behind: number | null, remote_commits_ahead: number | null, merges: Array<Merge>, is_rebase_in_progress: boolean, conflict_op: ConflictOp | null, conflicted_files: Array<string>, is_target_remote: boolean, };
 
 export type UpdateWorkspace = { archived: boolean | null, pinned: boolean | null, name: string | null, };
+
+export type UpdateSession = { name: string | null, };
 
 export type WorkspaceSummaryRequest = { archived: boolean, };
 
@@ -609,7 +607,9 @@ export type ExecutorConfigs = { executors: { [key in BaseCodingAgent]?: Executor
 
 export enum BaseAgentCapability { SESSION_FORK = "SESSION_FORK", SETUP_HELPER = "SETUP_HELPER", CONTEXT_USAGE = "CONTEXT_USAGE" }
 
-export type ClaudeCode = { append_prompt: AppendPrompt, claude_code_router?: boolean | null, plan?: boolean | null, approvals?: boolean | null, model?: string | null, agent?: string | null, dangerously_skip_permissions?: boolean | null, disable_api_key?: boolean | null, base_command_override?: string | null, additional_params?: Array<string> | null, env?: { [key in string]?: string } | null, };
+export type ClaudeEffort = "low" | "medium" | "high" | "max";
+
+export type ClaudeCode = { append_prompt: AppendPrompt, claude_code_router?: boolean | null, plan?: boolean | null, approvals?: boolean | null, model?: string | null, effort?: ClaudeEffort | null, agent?: string | null, dangerously_skip_permissions?: boolean | null, disable_api_key?: boolean | null, base_command_override?: string | null, additional_params?: Array<string> | null, env?: { [key in string]?: string } | null, };
 
 export type Gemini = { append_prompt: AppendPrompt, model?: string | null, yolo?: boolean | null, base_command_override?: string | null, additional_params?: Array<string> | null, env?: { [key in string]?: string } | null, };
 

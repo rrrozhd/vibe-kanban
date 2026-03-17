@@ -60,6 +60,8 @@ import { useActionVisibilityContext } from '@/shared/hooks/useActionVisibilityCo
 import { PrCommentsDialog } from '@/shared/dialogs/tasks/PrCommentsDialog';
 import type { NormalizedComment } from '@vibe/ui/components/pr-comment-node';
 import { useAppNavigation } from '@/shared/hooks/useAppNavigation';
+import { sessionsApi } from '@/shared/lib/api';
+import { RenameSessionDialog } from '@vibe/ui/components/RenameSessionDialog';
 
 /** Compute execution status from boolean flags */
 function computeExecutionStatus(params: {
@@ -160,6 +162,21 @@ export function SessionChatBoxContainer(props: SessionChatBoxContainerProps) {
 
   const sessionId = session?.id;
   const queryClient = useQueryClient();
+
+  const handleRenameSession = useCallback(
+    (targetSessionId: string, currentName: string) => {
+      void RenameSessionDialog.show({
+        currentName,
+        onRename: async (newName: string) => {
+          await sessionsApi.update(targetSessionId, { name: newName });
+          void queryClient.invalidateQueries({
+            queryKey: ['workspaceSessions', workspaceId],
+          });
+        },
+      });
+    },
+    [queryClient, workspaceId]
+  );
   const appNavigation = useAppNavigation();
 
   const { executeAction } = useActions();
@@ -396,26 +413,6 @@ export function SessionChatBoxContainer(props: SessionChatBoxContainerProps) {
   const { uploadFiles, localImages, clearUploadedImages } =
     useSessionAttachments(workspaceId, sessionId, handleInsertMarkdown);
 
-  const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      const imageFiles = acceptedFiles.filter((f) =>
-        f.type.startsWith('image/')
-      );
-      if (imageFiles.length > 0) {
-        uploadFiles(imageFiles);
-      }
-    },
-    [uploadFiles]
-  );
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: { 'image/*': [] },
-    disabled: mode === 'placeholder' || isAttemptRunning,
-    noClick: true,
-    noKeyboard: true,
-  });
-
   // Unified executor + variant + model selector options resolution
   const {
     executorConfig,
@@ -622,6 +619,37 @@ export function SessionChatBoxContainer(props: SessionChatBoxContainerProps) {
     editContext.cancelEdit();
     cancelDebouncedSave();
     setLocalMessage('');
+  });
+
+  const areAttachmentInputsDisabled =
+    mode === 'placeholder' ||
+    isQueued ||
+    isSending ||
+    isStopping ||
+    !!feedbackContext?.isSubmitting ||
+    editRetryMutation.isPending ||
+    isApproving ||
+    isDenying ||
+    isAnswering;
+
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      const imageFiles = acceptedFiles.filter((f) =>
+        f.type.startsWith('image/')
+      );
+      if (imageFiles.length > 0) {
+        uploadFiles(imageFiles);
+      }
+    },
+    [uploadFiles]
+  );
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { 'image/*': [] },
+    disabled: areAttachmentInputsDisabled,
+    noClick: true,
+    noKeyboard: true,
   });
 
   // Handle edit submission
@@ -985,6 +1013,7 @@ export function SessionChatBoxContainer(props: SessionChatBoxContainerProps) {
         onSelectSession: onSelectSession ?? (() => {}),
         isNewSessionMode: needsExecutorSelection,
         onNewSession: onStartNewSession,
+        onRenameSession: handleRenameSession,
       }}
       toolbarActions={{
         items: toolbarActionItems,

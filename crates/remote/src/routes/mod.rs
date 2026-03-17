@@ -41,6 +41,7 @@ pub mod issues;
 mod migration;
 pub mod notifications;
 mod oauth;
+pub mod overseer;
 pub(crate) mod organization_members;
 mod organizations;
 pub mod project_statuses;
@@ -129,6 +130,7 @@ pub fn router(state: AppState) -> Router {
         .merge(issue_relationships::router())
         .merge(pull_requests::router())
         .merge(notifications::router())
+        .merge(overseer::router())
         .merge(workspaces::router())
         .merge(billing::protected_router())
         .merge(migration::router())

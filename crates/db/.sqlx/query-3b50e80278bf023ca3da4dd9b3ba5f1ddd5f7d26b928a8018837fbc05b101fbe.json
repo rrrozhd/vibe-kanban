@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT COALESCE(MAX(issue_number), 0) as \"n!\" FROM overseer_issues WHERE project_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "name": "n!",
+        "ordinal": 0,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "3b50e80278bf023ca3da4dd9b3ba5f1ddd5f7d26b928a8018837fbc05b101fbe"
+}

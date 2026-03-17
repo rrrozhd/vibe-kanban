@@ -66,6 +66,7 @@ pub fn router(deployment: DeploymentImpl) -> IntoMakeService<Router> {
     let api_routes = Router::new()
         .merge(relay_auth::router())
         .merge(relay_signed_routes)
+        .merge(remote::overseer::router())
         .layer(ValidateRequestHeaderLayer::custom(
             middleware::validate_origin,
         ))

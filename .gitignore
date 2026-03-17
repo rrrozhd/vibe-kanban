@@ -2,6 +2,10 @@
 target/
 **/*.rs.bk
 
+# Dev secrets
+.dev-jwt-secret
+.pids/
+
 # Node.js
 node_modules/
 npm-debug.log*
@@ -95,3 +99,4 @@ vibe-kanban-cloud/
 *.ts.net.key
 Caddyfile
 Caddyfile.dev
+.dev-jwt-secret
